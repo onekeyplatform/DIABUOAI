@@ -12,6 +12,7 @@ import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.mod
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { UsersModule } from './modules/users/users.module';
+import { WorkflowEngineModule } from './modules/workflow-engine/workflow-engine.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UsersModule } from './modules/users/users.module';
     ChatModule,
     KnowledgeBaseModule,
     DocumentsModule,
+    WorkflowEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

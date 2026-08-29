@@ -8,6 +8,7 @@ import { KnowledgeBaseBoard } from '../modules/knowledge-base/kb-board';
 import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
 import { UsersTable } from '../modules/users/users-table';
+import { WorkflowEngineBoard } from '../modules/workflow-engine/workflow-board';
 
 export default function HomePage() {
   return (
@@ -35,6 +36,7 @@ export default function HomePage() {
           <ChatPanel />
           <KnowledgeBaseBoard />
           <DocumentsBoard />
+          <WorkflowEngineBoard />
         </div>
       </div>
     </main>
