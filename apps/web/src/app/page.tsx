@@ -1,4 +1,6 @@
 import { Button } from '@diabuoai/ui';
+import { LoginForm } from '../modules/auth/login-form';
+import { RolesPanel } from '../modules/rbac/roles-panel';
 
 export default function HomePage() {
   return (
@@ -15,6 +17,10 @@ export default function HomePage() {
         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
           <Button variant="primary">Launch workspace</Button>
           <Button variant="secondary">View architecture</Button>
+        </div>
+        <div style={{ marginTop: '3rem', display: 'grid', gap: '2rem' }}>
+          <LoginForm />
+          <RolesPanel />
         </div>
       </div>
     </main>

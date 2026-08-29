@@ -3,6 +3,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { RbacModule } from './modules/rbac/rbac.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { AppService } from './app.service';
       playground: true,
       introspection: true,
     }),
+    AuthModule,
+    RbacModule,
   ],
   controllers: [AppController],
   providers: [AppService],
