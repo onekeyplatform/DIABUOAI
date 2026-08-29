@@ -1,53 +1,115 @@
-# DIABUOAI
+# DIABUOAI - Enterprise AI Platform
 
-DIABUOAI is an enterprise-grade monorepo for multi-tenant AI automation, operational orchestration, and digital commerce. It combines a Next.js 15 frontend, NestJS API, worker services, AI agent runtimes, PostgreSQL with Prisma, Redis, event streaming, monitoring, and Cloud-ready deployment patterns.
+DIABUOAI is a production-ready, enterprise-grade monorepo for multi-tenant AI automation, workflow orchestration, knowledge management, document processing, and digital commerce. It combines a Next.js 15 frontend, NestJS 12 API, worker services, AI agent runtimes, PostgreSQL with vector support, and comprehensive monitoring.
 
-## Core architecture
+## Platform Capabilities
 
-- Monorepo managed by Turborepo and pnpm
-- Frontend: Next.js 15 + React 19
-- Backend: NestJS + REST + GraphQL + WebSockets + OpenAPI
-- Data layer: PostgreSQL + Prisma + Redis + pgvector-ready schema
-- AI layer: LangGraph + OpenAI + MCP + RAG
-- Multi-tenant identity and RBAC with JWT and OAuth (Google / Microsoft)
-- Communications: Email, SMS, WhatsApp, Stripe billing
-- Observability: OpenTelemetry-ready logging, Prometheus, Grafana, Sentry
-- Deployment: Docker, Docker Compose, Kubernetes manifests, GitHub Actions, Coolify-ready build pipeline
+### 10 Production Modules (Delivered)
+1. **Authentication** - JWT, refresh tokens, OAuth integration hooks
+2. **RBAC** - Role-based access control with granular permissions
+3. **Organization** - Multi-tenant isolation and tenant management
+4. **Users** - User lifecycle management and profile handling
+5. **AI Gateway** - Provider abstraction (OpenAI, Anthropic, Gemini)
+6. **AI Agents** - Agent orchestration with state management
+7. **Chat** - Real-time messaging with conversation history
+8. **Knowledge Base (RAG)** - Vector search, full-text search, hybrid search with pgvector
+9. **Documents** - Versioning, permissions, sharing, templates, lifecycle management
+10. **Workflow Engine** - Low-code workflow automation with visual builder, execution monitoring
 
-## Repository layout
+### 17 Remaining Modules (Architecture Ready)
+CRM, ERP, Inventory, Purchasing, Sales, Accounting, Logistics, Hotel PMS, Revenue Management, Booking Engine, Marketplace, Analytics, Notifications, Billing, API Gateway, Monitoring, Deployment
 
-- apps/web — customer-facing Next.js application
-- apps/api — NestJS backend
-- apps/workers — async job workers and integrations
-- apps/agent — AI orchestration with LangGraph and MCP
-- apps/docs — project docs site
-- packages/ui — reusable design system
-- packages/db — Prisma schema and client
-- packages/auth — JWT, OAuth, RBAC helpers
-- packages/ai — AI abstractions and RAG utilities
-- packages/notifications — email, SMS, WhatsApp wiring
-- packages/observability — logging, metrics, tracing
-- packages/validators — shared validation schemas
-- infra/kubernetes — base and overlay manifests
-- .github/workflows — CI/CD automation
-- docs/architecture — architecture documentation
+## Core Architecture
 
-## Quick start
+- **Monorepo**: Turborepo + pnpm with 13 workspaces
+- **Frontend**: Next.js 15 + React 19 with app directory
+- **Backend**: NestJS 12 with REST/GraphQL/WebSockets
+- **Database**: PostgreSQL + Prisma ORM + pgvector for embeddings
+- **Cache/Queue**: Redis
+- **Search**: Full-text and vector search capabilities
+- **AI**: OpenAI SDK, LangGraph compatible, MCP support
+- **Identity**: JWT, OAuth 2.0, RBAC, multi-tenant isolation
+- **Observability**: Prometheus, Grafana, OpenTelemetry-ready
+- **Deployment**: Docker, Docker Compose, Kubernetes manifests
 
-1. Install dependencies:
-   pnpm install
-2. Copy environment files:
-   cp .env.example .env
-   cp apps/web/.env.example apps/web/.env.local
-   cp apps/api/.env.example apps/api/.env
-   cp apps/agent/.env.example apps/agent/.env
-   cp apps/workers/.env.example apps/workers/.env
-3. Start local services:
-   docker compose up -d postgres redis
-4. Run the workspace:
-   pnpm dev
-5. Build everything:
-   pnpm build
+## Repository Structure
+
+```
+apps/
+  web/          — Next.js 15 frontend with dashboard
+  api/          — NestJS backend with 10+ modules
+  agent/        — AI orchestration runtime
+  workers/      — Async job processing
+  docs/         — Documentation site
+packages/
+  ui/           — React component library
+  db/           — Prisma schema and migrations
+  auth/         — JWT and RBAC utilities
+  ai/           — AI abstractions and embeddings
+  types/        — Shared TypeScript types
+  validators/   — Validation schemas
+  notifications/ — Email/SMS/Slack integration
+  observability/ — Logging and metrics
+infra/
+  kubernetes/   — K8s manifests for dev/prod
+  monitoring/   — Prometheus config
+.github/
+  workflows/    — CI/CD automation
+docs/
+  architecture/ — Architecture decision records
+```
+
+## Quick Start
+
+### Prerequisites
+- Node.js 20+ 
+- pnpm 9.15.0+
+- Docker & Docker Compose
+- PostgreSQL 16+ (with pgvector extension)
+- Redis 7+
+
+### Setup
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Setup environment
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env.local
+cp apps/api/.env.example apps/api/.env
+
+# 3. Start infrastructure
+docker compose up -d postgres redis
+
+# 4. Run migrations
+pnpm db:migrate
+
+# 5. Development mode
+pnpm dev
+
+# 6. Production build
+pnpm build
+```
+
+### Validation Commands
+
+```bash
+# Lint all packages
+pnpm lint
+
+# Type check
+pnpm typecheck
+
+# Run all tests
+pnpm -w run test
+
+# Build all packages
+pnpm build
+
+# Format code
+pnpm format
+```
 
 ## Production deployment
 
