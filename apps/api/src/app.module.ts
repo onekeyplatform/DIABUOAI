@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RbacModule } from './modules/rbac/rbac.module';
     AuthModule,
     RbacModule,
     OrganizationModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

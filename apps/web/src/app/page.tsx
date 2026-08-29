@@ -2,6 +2,7 @@ import { Button } from '@diabuoai/ui';
 import { LoginForm } from '../modules/auth/login-form';
 import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
+import { UsersTable } from '../modules/users/users-table';
 
 export default function HomePage() {
   return (
@@ -23,6 +24,7 @@ export default function HomePage() {
           <LoginForm />
           <RolesPanel />
           <OrganizationList />
+          <UsersTable />
         </div>
       </div>
     </main>
