@@ -3,6 +3,7 @@ import { LoginForm } from '../modules/auth/login-form';
 import { AgentBoard } from '../modules/ai-agents/agent-board';
 import { AiGenerator } from '../modules/ai-gateway/ai-generator';
 import { ChatPanel } from '../modules/chat/chat-panel';
+import { DocumentsBoard } from '../modules/documents/documents-board';
 import { KnowledgeBaseBoard } from '../modules/knowledge-base/kb-board';
 import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
@@ -33,6 +34,7 @@ export default function HomePage() {
           <AgentBoard />
           <ChatPanel />
           <KnowledgeBaseBoard />
+          <DocumentsBoard />
         </div>
       </div>
     </main>
