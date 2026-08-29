@@ -1,5 +1,6 @@
 import { Button } from '@diabuoai/ui';
 import { LoginForm } from '../modules/auth/login-form';
+import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
 
 export default function HomePage() {
@@ -21,6 +22,7 @@ export default function HomePage() {
         <div style={{ marginTop: '3rem', display: 'grid', gap: '2rem' }}>
           <LoginForm />
           <RolesPanel />
+          <OrganizationList />
         </div>
       </div>
     </main>

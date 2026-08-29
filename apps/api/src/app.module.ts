@@ -4,6 +4,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { RbacModule } from './modules/rbac/rbac.module';
     }),
     AuthModule,
     RbacModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
