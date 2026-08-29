@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+  apiKeys     ApiKey[]
+  auditLogs   AuditLog[]
+  documents   Document[]
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  passwordHash  String?
+  avatarUrl     String?
+  tenantId      String
+  roles         UserRole[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  oauthAccounts OAuthAccount[]
+  sessions      Session[]
+}
+
+model Role {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  permissions Permission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  roles       Role[]
+}
+
+model UserRole {
+  id      String @id @default(cuid())
+  userId  String
+  roleId  String
+  user    User   @relation(fields: [userId], references: [id])
+  role    Role   @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+model OAuthAccount {
+  id               String   @id @default(cuid())
+  userId           String
+  provider         String
+  providerUserId   String
+  accessToken      String?
+  refreshToken     String?
+  expiresAt        DateTime?
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerUserId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  tenantId  String
+  keyHash   String
+  name      String
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  actorId   String?
+  action    String
+  model     String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  tenantId    String
+  title       String
+  content     String
+  embedding   Unsupported("vector")?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}

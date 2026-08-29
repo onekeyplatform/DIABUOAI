@@ -1,0 +1,13 @@
+name: Deploy to Coolify
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify deployment
+        run: |
+          echo "Trigger deployment to Coolify"
+          echo "Set COOLIFY_WEBHOOK_URL in repository secrets"

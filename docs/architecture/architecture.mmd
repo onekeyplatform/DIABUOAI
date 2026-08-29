@@ -1,0 +1,10 @@
+flowchart LR
+    User --> Web[Next.js 15 Web App]
+    Web --> API[NestJS API]
+    API --> DB[(PostgreSQL / Prisma)]
+    API --> Redis[(Redis)]
+    API --> Agent[LangGraph AI Agent]
+    Agent --> OpenAI[OpenAI API]
+    API --> Stripe[Stripe]
+    API --> Email[Email / SMS / WhatsApp]
+    API --> Observability[Prometheus / Grafana / Sentry]

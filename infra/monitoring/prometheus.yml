@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'diabuoai-api'
+    static_configs:
+      - targets: ['api:4000']
+  - job_name: 'diabuoai-web'
+    static_configs:
+      - targets: ['web:3000']

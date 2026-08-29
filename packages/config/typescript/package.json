@@ -1,0 +1,11 @@
+{
+  "name": "@diabuoai/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["*.json"],
+  "exports": {
+    "./base": "./base.json",
+    "./nextjs": "./nextjs.json",
+    "./nestjs": "./nestjs.json"
+  }
+}

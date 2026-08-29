@@ -1,0 +1,25 @@
+{
+  "name": "@diabuoai/workers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@diabuoai/ai": "workspace:*",
+    "@diabuoai/notifications": "workspace:*",
+    "bullmq": "^5.12.2",
+    "dotenv": "^16.4.7",
+    "ioredis": "^5.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.13.0"
+  }
+}
