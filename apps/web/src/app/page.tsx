@@ -2,6 +2,7 @@ import { Button } from '@diabuoai/ui';
 import { LoginForm } from '../modules/auth/login-form';
 import { AgentBoard } from '../modules/ai-agents/agent-board';
 import { AiGenerator } from '../modules/ai-gateway/ai-generator';
+import { ChatPanel } from '../modules/chat/chat-panel';
 import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
 import { UsersTable } from '../modules/users/users-table';
@@ -29,6 +30,7 @@ export default function HomePage() {
           <UsersTable />
           <AiGenerator />
           <AgentBoard />
+          <ChatPanel />
         </div>
       </div>
     </main>

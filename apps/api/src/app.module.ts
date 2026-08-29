@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AiAgentsModule } from './modules/ai-agents/ai-agents.module';
 import { AiGatewayModule } from './modules/ai-gateway/ai-gateway.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { UsersModule } from './modules/users/users.module';
@@ -24,6 +25,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     AiGatewayModule,
     AiAgentsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
