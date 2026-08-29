@@ -107,7 +107,7 @@ export class KnowledgeBaseService {
       document.updatedAt = new Date();
     } catch (error) {
       document.status = 'failed';
-      document.errorMessage = error.message;
+      document.errorMessage = error instanceof Error ? error.message : String(error);
       document.updatedAt = new Date();
       throw error;
     }

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { RoleDefinition, RoleAssignment } from './rbac.types';
+import type { RoleDefinition, RoleAssignment } from './rbac.types';
+import { type PermissionName } from './rbac.types';
 
 @Injectable()
 export class RbacService {
@@ -11,7 +12,7 @@ export class RbacService {
       where: { users: { some: { user: { tenantId } } } },
     });
 
-    return roles.map((role) => ({
+    return roles.map((role: any) => ({
       id: role.id,
       name: role.name,
       description: role.description || undefined,
@@ -46,18 +47,18 @@ export class RbacService {
       include: { role: true },
     });
 
-    return assignments.some((assignment) => {
+    return assignments.some((assignment: any) => {
       const perms = this.defaultPermissionsForRole(assignment.role.name);
       return perms.includes(permission as any);
     });
   }
 
-  private defaultPermissionsForRole(roleName: string): string[] {
-    const map: Record<string, string[]> = {
-      owner: ['users.read', 'users.write', 'tenants.read', 'tenants.write', 'roles.manage', 'audit.read', 'billing.read', 'billing.write'],
-      admin: ['users.read', 'users.write', 'tenants.read', 'roles.manage', 'audit.read', 'billing.read'],
-      manager: ['users.read', 'users.write', 'tenants.read', 'audit.read'],
-      member: ['users.read'],
+  private defaultPermissionsForRole(roleName: string): PermissionName[] {
+    const map: Record<string, PermissionName[]> = {
+      owner: ['users.read', 'users.write', 'tenants.read', 'tenants.write', 'roles.manage', 'audit.read', 'billing.read', 'billing.write'] as PermissionName[],
+      admin: ['users.read', 'users.write', 'tenants.read', 'roles.manage', 'audit.read', 'billing.read'] as PermissionName[],
+      manager: ['users.read', 'users.write', 'tenants.read', 'audit.read'] as PermissionName[],
+      member: ['users.read'] as PermissionName[],
     };
 
     return map[roleName] || [];

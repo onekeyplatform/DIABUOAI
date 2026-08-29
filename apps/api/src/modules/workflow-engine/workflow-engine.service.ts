@@ -209,7 +209,7 @@ export class WorkflowEngineService {
       };
     } catch (error) {
       execution.status = 'failed';
-      execution.error = error.message;
+      execution.error = error instanceof Error ? error.message : String(error);
       execution.completedAt = new Date();
 
       return {
@@ -217,7 +217,7 @@ export class WorkflowEngineService {
         status: 'failed',
         duration: Date.now() - startTime,
         stepResults: {},
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -280,7 +280,7 @@ export class WorkflowEngineService {
         stepId: step.id,
         status: 'failed',
         input: step.config,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         startedAt: new Date(startTime),
         completedAt: new Date(),
         duration: Date.now() - startTime,
@@ -389,7 +389,7 @@ export class WorkflowEngineService {
       id: templateId,
       tenantId,
       name,
-      description: workflow.description,
+      description: workflow.description || '',
       category,
       workflow,
       createdAt: new Date(),

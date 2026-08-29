@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
-import { CreateDocumentInput, DocumentSearchFilters, UpdateDocumentInput } from './documents.types';
+import type { CreateDocumentInput, DocumentSearchFilters, UpdateDocumentInput } from './documents.types';
 
 @Controller('documents')
 @ApiTags('Documents')

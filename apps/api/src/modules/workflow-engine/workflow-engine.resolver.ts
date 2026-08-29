@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { WorkflowEngineService } from './workflow-engine.service';
-import { CreateWorkflowInput } from './workflow.types';
+import type { CreateWorkflowInput } from './workflow.types';
 
 @Resolver()
 export class WorkflowEngineResolver {

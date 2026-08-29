@@ -364,8 +364,7 @@ export class DocumentsService {
       tenantId,
       name,
       content,
-      category,
-      createdAt: new Date(),
+      category,      description: '',      createdAt: new Date(),
     };
 
     this.templates.set(templateId, template);

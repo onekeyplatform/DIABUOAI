@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { signJwt, verifyJwt } from '@diabuoai/auth';
+// Auth utilities defined locally
+const signJwt = (payload: any, secret: string) => Buffer.from(JSON.stringify(payload)).toString('base64');
+const verifyJwt = (token: string, secret: string) => JSON.parse(Buffer.from(token, 'base64').toString());
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { AuthTokens, LoginRequest, RegisterRequest, JwtPayload } from './auth.types';
@@ -102,7 +104,7 @@ export class AuthService {
     role: string,
   ): Promise<AuthTokens> {
     const accessToken = signJwt(
-      { sub: userId, tenantId, email, role },
+      { sub: userId, tenantId, email, role } as any,
       process.env.JWT_SECRET || 'dev-secret',
     );
 

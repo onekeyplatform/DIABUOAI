@@ -33,7 +33,7 @@ export class KnowledgeBaseController {
     },
   })
   async uploadDocument(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() body: { tenantId: string; title: string },
   ) {
     return this.kbService.uploadDocument({

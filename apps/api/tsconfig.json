@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2020",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,

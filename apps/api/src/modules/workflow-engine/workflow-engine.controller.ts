@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { WorkflowEngineService } from './workflow-engine.service';
-import { CreateWorkflowInput, ExecuteWorkflowInput } from './workflow.types';
+import type { CreateWorkflowInput, ExecuteWorkflowInput } from './workflow.types';
 
 @Controller('workflows')
 @ApiTags('Workflow Engine')
