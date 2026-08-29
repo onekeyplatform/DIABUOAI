@@ -1,5 +1,6 @@
 import { Button } from '@diabuoai/ui';
 import { LoginForm } from '../modules/auth/login-form';
+import { AiGenerator } from '../modules/ai-gateway/ai-generator';
 import { OrganizationList } from '../modules/organization/organization-list';
 import { RolesPanel } from '../modules/rbac/roles-panel';
 import { UsersTable } from '../modules/users/users-table';
@@ -25,6 +26,7 @@ export default function HomePage() {
           <RolesPanel />
           <OrganizationList />
           <UsersTable />
+          <AiGenerator />
         </div>
       </div>
     </main>
