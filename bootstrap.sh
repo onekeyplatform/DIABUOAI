@@ -6,7 +6,12 @@ echo "=== DIABUOAI Bootstrap ==="
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-PNPM_VERSION="$(node -p "require('./package.json').packageManager.replace(/^pnpm@/, '')")"
+PACKAGE_MANAGER="$(node -p "require('./package.json').packageManager || ''")"
+if [[ ! "$PACKAGE_MANAGER" =~ ^pnpm@.+$ ]]; then
+  echo "ERROR: package.json must define packageManager as pnpm@<version>."
+  exit 1
+fi
+PNPM_VERSION="${PACKAGE_MANAGER#pnpm@}"
 INFRA_SERVICES=(postgres redis prometheus grafana mailhog)
 APP_SERVICES=(web api workers agent)
 DO_CLEANUP="${BOOTSTRAP_CLEAN:-0}"
@@ -30,11 +35,11 @@ else
 fi
 
 # Install workspace dependencies
-pnpm install
+pnpm install --frozen-lockfile
 
 # Build all packages (best-effort, warn on failure)
 build_status=0
-pnpm exec turbo run build || build_status=$?
+pnpm build || build_status=$?
 if [ "$build_status" -ne 0 ]; then
   echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
 fi
