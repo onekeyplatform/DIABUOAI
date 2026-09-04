@@ -80,9 +80,9 @@ if [ "$build_status" -ne 0 ]; then
 fi
 
 # Start services
-if [ "$build_status" -eq 0 ]; then
-  docker compose up -d "${INFRA_SERVICES[@]}"
+docker compose up -d "${INFRA_SERVICES[@]}"
 
+if [ "$build_status" -eq 0 ]; then
   wait_for_service "postgres" \
     "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
     "Postgres is not ready after waiting."
@@ -91,8 +91,6 @@ if [ "$build_status" -eq 0 ]; then
     "Redis is not ready after waiting."
 
   docker compose up -d --build "${APP_SERVICES[@]}"
-else
-  docker compose up -d "${INFRA_SERVICES[@]}"
 fi
 
 echo
