@@ -82,14 +82,14 @@ fi
 # Start services
 docker compose up -d "${INFRA_SERVICES[@]}"
 
-if [ "$build_status" -eq 0 ]; then
-  wait_for_service "postgres" \
-    "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
-    "Postgres is not ready after waiting."
-  wait_for_service "redis" \
-    "docker compose exec -T redis redis-cli ping" \
-    "Redis is not ready after waiting."
+wait_for_service "postgres" \
+  "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
+  "Postgres is not ready after waiting."
+wait_for_service "redis" \
+  "docker compose exec -T redis redis-cli ping" \
+  "Redis is not ready after waiting."
 
+if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
 fi
 
