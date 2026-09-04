@@ -75,6 +75,35 @@ if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
 
+AVAILABLE_COMPOSE_SERVICES="$(docker compose config --services 2>/dev/null || true)"
+if [ -z "$AVAILABLE_COMPOSE_SERVICES" ]; then
+  echo "ERROR: Unable to resolve services from docker compose configuration."
+  exit 1
+fi
+
+INFRA_SERVICES_TO_START=()
+for service in "${INFRA_SERVICES[@]}"; do
+  if printf '%s\n' "$AVAILABLE_COMPOSE_SERVICES" | grep -Fxq "$service"; then
+    INFRA_SERVICES_TO_START+=("$service")
+  fi
+done
+
+APP_SERVICES_TO_START=()
+for service in "${APP_SERVICES[@]}"; do
+  if printf '%s\n' "$AVAILABLE_COMPOSE_SERVICES" | grep -Fxq "$service"; then
+    APP_SERVICES_TO_START+=("$service")
+  fi
+done
+
+if ! printf '%s\n' "$AVAILABLE_COMPOSE_SERVICES" | grep -Fxq "postgres"; then
+  echo "ERROR: Required service 'postgres' is missing from docker compose configuration."
+  exit 1
+fi
+if ! printf '%s\n' "$AVAILABLE_COMPOSE_SERVICES" | grep -Fxq "redis"; then
+  echo "ERROR: Required service 'redis' is missing from docker compose configuration."
+  exit 1
+fi
+
 # Update Corepack and PNPM
 if command -v corepack >/dev/null 2>&1; then
   corepack enable
@@ -126,9 +155,9 @@ if [ "$build_status" -ne 0 ]; then
 fi
 
 # Start services
-docker compose up -d "${INFRA_SERVICES[@]}"
+docker compose up -d "${INFRA_SERVICES_TO_START[@]}"
 
-for service in "${INFRA_SERVICES[@]}"; do
+for service in "${INFRA_SERVICES_TO_START[@]}"; do
   wait_for_service_running "$service"
 done
 
@@ -139,7 +168,9 @@ wait_for_tcp_port "127.0.0.1" "$POSTGRES_HOST_PORT" "Postgres TCP port is not re
 wait_for_tcp_port "127.0.0.1" "$REDIS_HOST_PORT" "Redis TCP port is not reachable after waiting."
 
 if [ "$build_status" -eq 0 ]; then
-  docker compose up -d --build "${APP_SERVICES[@]}"
+  if [ "${#APP_SERVICES_TO_START[@]}" -gt 0 ]; then
+    docker compose up -d --build "${APP_SERVICES_TO_START[@]}"
+  fi
 fi
 
 echo
