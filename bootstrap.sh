@@ -19,6 +19,26 @@ if [ "${1:-}" = "--clean" ]; then
   DO_CLEANUP=1
 fi
 
+wait_for_service() {
+  local name="$1"
+  local check_cmd="$2"
+  local error_message="$3"
+
+  for _ in {1..30}; do
+    if eval "$check_cmd" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 2
+  done
+
+  if ! eval "$check_cmd" >/dev/null 2>&1; then
+    echo "ERROR: ${error_message}"
+    exit 1
+  fi
+
+  return 0
+}
+
 # Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
@@ -56,34 +76,19 @@ pnpm install --frozen-lockfile
 build_status=0
 pnpm build || build_status=$?
 if [ "$build_status" -ne 0 ]; then
-  echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
+  echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing with infrastructure-only startup."
 fi
 
 # Start services
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d "${INFRA_SERVICES[@]}"
 
-  for _ in {1..30}; do
-    if docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}" >/dev/null 2>&1; then
-      break
-    fi
-    sleep 2
-  done
-  if ! docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}" >/dev/null 2>&1; then
-    echo "ERROR: Postgres is not ready after waiting."
-    exit 1
-  fi
-
-  for _ in {1..30}; do
-    if docker compose exec -T redis redis-cli ping >/dev/null 2>&1; then
-      break
-    fi
-    sleep 2
-  done
-  if ! docker compose exec -T redis redis-cli ping >/dev/null 2>&1; then
-    echo "ERROR: Redis is not ready after waiting."
-    exit 1
-  fi
+  wait_for_service "postgres" \
+    "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
+    "Postgres is not ready after waiting."
+  wait_for_service "redis" \
+    "docker compose exec -T redis redis-cli ping" \
+    "Redis is not ready after waiting."
 
   docker compose up -d --build "${APP_SERVICES[@]}"
 else

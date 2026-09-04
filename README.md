@@ -70,6 +70,8 @@ docs/
 
 ### Setup
 
+Ensure Node.js, Corepack/PNPM, and Docker Compose are installed before running bootstrap.
+
 ```bash
 # One-command bootstrap
 bash ./bootstrap.sh
