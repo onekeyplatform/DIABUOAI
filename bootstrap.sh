@@ -45,6 +45,30 @@ wait_for_service() {
   return 0
 }
 
+wait_for_service_output_equals() {
+  local error_message="$1"
+  local expected_output="$2"
+  shift 2
+  local is_ready=1
+  local i
+  local output=""
+
+  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
+    if output="$("$@" 2>/dev/null)" && [ "$output" = "$expected_output" ]; then
+      is_ready=0
+      break
+    fi
+    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
+  done
+
+  if [ "$is_ready" -ne 0 ]; then
+    echo "ERROR: ${error_message}"
+    exit 1
+  fi
+
+  return 0
+}
+
 wait_for_service_running() {
   local service="$1"
   local i
@@ -121,10 +145,11 @@ wait_for_service_running redis
 
 wait_for_service \
   "Postgres is not ready after waiting." \
-  docker compose exec -T postgres sh -lc "pg_isready -U '${POSTGRES_CHECK_USER}' -d '${POSTGRES_CHECK_DB}' | grep -Fq 'accepting connections'"
-wait_for_service \
+  docker compose exec -T postgres pg_isready -U "${POSTGRES_CHECK_USER}" -d "${POSTGRES_CHECK_DB}"
+wait_for_service_output_equals \
   "Redis is not ready after waiting." \
-  docker compose exec -T redis sh -lc "redis-cli ping | grep -Fxq PONG"
+  "PONG" \
+  docker compose exec -T redis redis-cli --raw ping
 
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
