@@ -20,8 +20,8 @@ if [ "${1:-}" = "--clean" ]; then
 fi
 
 # Service readiness polling defaults (30 retries * 2s = 60s max wait per service).
-SERVICE_READY_MAX_RETRIES=30
-SERVICE_READY_RETRY_DELAY_SEC=2
+SERVICE_READY_MAX_RETRIES="${BOOTSTRAP_SERVICE_READY_MAX_RETRIES:-30}"
+SERVICE_READY_RETRY_DELAY_SEC="${BOOTSTRAP_SERVICE_READY_RETRY_DELAY_SEC:-2}"
 
 wait_for_service() {
   local check_cmd="$1"
@@ -88,7 +88,7 @@ fi
 docker compose up -d "${INFRA_SERVICES[@]}"
 
 wait_for_service \
-  "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
+  "docker compose exec -T postgres sh -lc 'pg_isready -U \"\${POSTGRES_USER:-postgres}\"'" \
   "Postgres is not ready after waiting."
 wait_for_service \
   "docker compose exec -T redis redis-cli ping" \
