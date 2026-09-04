@@ -27,6 +27,7 @@ wait_for_service() {
   local error_message="$1"
   shift
   local is_ready=1
+  local i
 
   for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
     if "$@" >/dev/null 2>&1; then
@@ -46,6 +47,7 @@ wait_for_service() {
 
 wait_for_service_running() {
   local service="$1"
+  local i
 
   for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
     if docker compose ps --status running --services | grep -Fxq "$service"; then
