@@ -59,8 +59,12 @@ if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
 
-# Start infrastructure and application
-docker compose up -d --build "${INFRA_SERVICES[@]}" "${APP_SERVICES[@]}"
+# Start services
+if [ "$build_status" -eq 0 ]; then
+  docker compose up -d --build "${INFRA_SERVICES[@]}" "${APP_SERVICES[@]}"
+else
+  docker compose up -d "${INFRA_SERVICES[@]}"
+fi
 
 echo
 echo "=== Container Status ==="
@@ -68,7 +72,9 @@ docker ps
 
 if [ "$build_status" -ne 0 ]; then
   echo
-  echo "Bootstrap completed with build warnings. Please review the build output above."
+  echo "Bootstrap completed with build warnings."
+  echo "Application services were not started because the workspace build failed."
+  echo "Please review the build output above and rerun bootstrap after fixing build errors."
 fi
 
 echo
