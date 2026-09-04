@@ -24,12 +24,12 @@ SERVICE_READY_MAX_RETRIES="${BOOTSTRAP_SERVICE_READY_MAX_RETRIES:-30}"
 SERVICE_READY_RETRY_DELAY_SEC="${BOOTSTRAP_SERVICE_READY_RETRY_DELAY_SEC:-2}"
 
 wait_for_service() {
-  local check_cmd="$1"
-  local error_message="$2"
+  local error_message="$1"
+  shift
   local is_ready=1
 
   for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
-    if eval "$check_cmd" >/dev/null 2>&1; then
+    if "$@" >/dev/null 2>&1; then
       is_ready=0
       break
     fi
@@ -47,6 +47,11 @@ wait_for_service() {
 # Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
+fi
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
 fi
 
 # Update Corepack and PNPM
@@ -88,11 +93,11 @@ fi
 docker compose up -d "${INFRA_SERVICES[@]}"
 
 wait_for_service \
-  "docker compose exec -T postgres sh -lc 'pg_isready -U \"\${POSTGRES_USER:-postgres}\"'" \
-  "Postgres is not ready after waiting."
+  "Postgres is not ready after waiting." \
+  docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}"
 wait_for_service \
-  "docker compose exec -T redis redis-cli ping" \
-  "Redis is not ready after waiting."
+  "Redis is not ready after waiting." \
+  docker compose exec -T redis redis-cli ping
 
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
