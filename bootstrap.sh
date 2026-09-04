@@ -19,55 +19,9 @@ if [ "${1:-}" = "--clean" ]; then
   DO_CLEANUP=1
 fi
 
-# Service readiness polling defaults (30 retries * 2s = 60s max wait per service).
+# Service readiness polling defaults (30 retries * 2s = 60s max wait per check).
 SERVICE_READY_MAX_RETRIES="${BOOTSTRAP_SERVICE_READY_MAX_RETRIES:-30}"
 SERVICE_READY_RETRY_DELAY_SEC="${BOOTSTRAP_SERVICE_READY_RETRY_DELAY_SEC:-2}"
-
-wait_for_service() {
-  local error_message="$1"
-  shift
-  local is_ready=1
-  local i
-
-  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
-    if "$@" >/dev/null 2>&1; then
-      is_ready=0
-      break
-    fi
-    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
-  done
-
-  if [ "$is_ready" -ne 0 ]; then
-    echo "ERROR: ${error_message}"
-    exit 1
-  fi
-
-  return 0
-}
-
-wait_for_service_output_equals() {
-  local error_message="$1"
-  local expected_output="$2"
-  shift 2
-  local is_ready=1
-  local i
-  local output=""
-
-  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
-    if output="$("$@" 2>/dev/null)" && [ "$output" = "$expected_output" ]; then
-      is_ready=0
-      break
-    fi
-    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
-  done
-
-  if [ "$is_ready" -ne 0 ]; then
-    echo "ERROR: ${error_message}"
-    exit 1
-  fi
-
-  return 0
-}
 
 wait_for_service_running() {
   local service="$1"
@@ -85,22 +39,27 @@ wait_for_service_running() {
   exit 1
 }
 
+wait_for_tcp_port() {
+  local host="$1"
+  local port="$2"
+  local error_message="$3"
+  local i
+
+  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
+    if bash -c ">/dev/tcp/${host}/${port}" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
+  done
+
+  echo "ERROR: ${error_message}"
+  exit 1
+}
+
 # Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
-
-POSTGRES_CHECK_USER="${POSTGRES_USER:-}"
-if [ -z "$POSTGRES_CHECK_USER" ] && [ -f .env ]; then
-  POSTGRES_CHECK_USER="$(grep -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_USER[[:space:]]*=' .env | head -n1 | sed -E 's/^[[:space:]]*(export[[:space:]]+)?POSTGRES_USER[[:space:]]*=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
-fi
-POSTGRES_CHECK_USER="${POSTGRES_CHECK_USER:-postgres}"
-
-POSTGRES_CHECK_DB="${POSTGRES_DB:-}"
-if [ -z "$POSTGRES_CHECK_DB" ] && [ -f .env ]; then
-  POSTGRES_CHECK_DB="$(grep -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_DB[[:space:]]*=' .env | head -n1 | sed -E 's/^[[:space:]]*(export[[:space:]]+)?POSTGRES_DB[[:space:]]*=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
-fi
-POSTGRES_CHECK_DB="${POSTGRES_CHECK_DB:-diabuoai}"
 
 # Update Corepack and PNPM
 if command -v corepack >/dev/null 2>&1; then
@@ -159,13 +118,8 @@ for service in "${INFRA_SERVICES[@]}"; do
   wait_for_service_running "$service"
 done
 
-wait_for_service \
-  "Postgres is not ready after waiting." \
-  docker compose exec -T postgres pg_isready -U "${POSTGRES_CHECK_USER}" -d "${POSTGRES_CHECK_DB}"
-wait_for_service_output_equals \
-  "Redis is not ready after waiting." \
-  "PONG" \
-  docker compose exec -T redis redis-cli --raw ping
+wait_for_tcp_port "127.0.0.1" "5432" "Postgres TCP port is not reachable after waiting."
+wait_for_tcp_port "127.0.0.1" "6379" "Redis TCP port is not reachable after waiting."
 
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
