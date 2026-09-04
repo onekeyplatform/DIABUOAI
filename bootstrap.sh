@@ -92,19 +92,24 @@ fi
 
 POSTGRES_CHECK_USER="${POSTGRES_USER:-}"
 if [ -z "$POSTGRES_CHECK_USER" ] && [ -f .env ]; then
-  POSTGRES_CHECK_USER="$(grep -E '^POSTGRES_USER=' .env | head -n1 | cut -d= -f2- | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
+  POSTGRES_CHECK_USER="$(grep -E '^(export[[:space:]]+)?POSTGRES_USER=' .env | head -n1 | sed -E 's/^(export[[:space:]]+)?POSTGRES_USER=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
 fi
 POSTGRES_CHECK_USER="${POSTGRES_CHECK_USER:-postgres}"
 
 POSTGRES_CHECK_DB="${POSTGRES_DB:-}"
 if [ -z "$POSTGRES_CHECK_DB" ] && [ -f .env ]; then
-  POSTGRES_CHECK_DB="$(grep -E '^POSTGRES_DB=' .env | head -n1 | cut -d= -f2- | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
+  POSTGRES_CHECK_DB="$(grep -E '^(export[[:space:]]+)?POSTGRES_DB=' .env | head -n1 | sed -E 's/^(export[[:space:]]+)?POSTGRES_DB=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
 fi
 POSTGRES_CHECK_DB="${POSTGRES_CHECK_DB:-diabuoai}"
 
 # Update Corepack and PNPM
-corepack enable
-corepack prepare "pnpm@${PNPM_VERSION}" --activate
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable
+  corepack prepare "pnpm@${PNPM_VERSION}" --activate
+elif ! command -v pnpm >/dev/null 2>&1; then
+  echo "ERROR: corepack is not available and pnpm is not installed."
+  exit 1
+fi
 
 # Optional cleanup
 if [ "$DO_CLEANUP" = "1" ]; then
