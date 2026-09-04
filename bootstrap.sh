@@ -38,13 +38,13 @@ if [ "$DO_CLEANUP" = "1" ]; then
     CLEANUP_DIRS+=(packages)
   fi
 
-  rm -rf node_modules
+  rm -rf -- node_modules
   if [ "${#CLEANUP_DIRS[@]}" -gt 0 ]; then
-    find "${CLEANUP_DIRS[@]}" -name node_modules -type d -prune -exec rm -rf {} +
-    find "${CLEANUP_DIRS[@]}" -name dist -type d -prune -exec rm -rf {} +
-    find "${CLEANUP_DIRS[@]}" -name .next -type d -prune -exec rm -rf {} +
+    find "${CLEANUP_DIRS[@]}" -name node_modules -type d -prune -exec rm -rf -- {} +
+    find "${CLEANUP_DIRS[@]}" -name dist -type d -prune -exec rm -rf -- {} +
+    find "${CLEANUP_DIRS[@]}" -name .next -type d -prune -exec rm -rf -- {} +
   fi
-  find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
+  find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf -- {} +
 else
   echo "Skipping cleanup (set BOOTSTRAP_CLEAN=1 or use --clean to enable)."
 fi
@@ -97,6 +97,7 @@ docker ps
 if [ "$build_status" -ne 0 ]; then
   echo
   echo "Bootstrap completed with build warnings."
+  echo "Infrastructure services were started."
   echo "Application services were not started because the workspace build failed."
   echo "Please review the build output above and rerun bootstrap after fixing build errors."
 fi
