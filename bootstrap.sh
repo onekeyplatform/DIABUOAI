@@ -6,37 +6,46 @@ echo "=== DIABUOAI Bootstrap ==="
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Aggiorna Corepack e PNPM
+# Update Corepack and PNPM
 corepack enable
 corepack prepare pnpm@9.15.0 --activate
 
-# Pulizia
+# Cleanup
 rm -rf node_modules
-find . -name node_modules -type d -prune -exec rm -rf {} +
-find . -name dist -type d -prune -exec rm -rf {} +
-find . -name .next -type d -prune -exec rm -rf {} +
-find . -name .turbo -type d -prune -exec rm -rf {} +
+find apps packages -name node_modules -type d -prune -exec rm -rf {} +
+find apps packages -name dist -type d -prune -exec rm -rf {} +
+find apps packages -name .next -type d -prune -exec rm -rf {} +
+find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
 
-# Installa dipendenze del workspace
+# Install workspace dependencies
 pnpm install
 
-# Build di tutti i package
-pnpm turbo run build || true
+# Build all packages (best-effort, warn on failure)
+build_status=0
+if ! pnpm turbo run build; then
+  build_status=$?
+  echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
+fi
 
-# Copia .env se manca
+# Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
 
-# Avvia l'infrastruttura
+# Start infrastructure
 docker compose up -d postgres redis prometheus grafana mailhog
 
-# Avvia l'applicazione
+# Start application
 docker compose up -d --build
 
 echo
-echo "=== Stato container ==="
+echo "=== Container Status ==="
 docker ps
 
+if [ "$build_status" -ne 0 ]; then
+  echo
+  echo "Bootstrap completed with build warnings. Please review the build output above."
+fi
+
 echo
-echo "=== Fine bootstrap ==="
+echo "=== Bootstrap Complete ==="
