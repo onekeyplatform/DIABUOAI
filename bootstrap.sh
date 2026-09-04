@@ -61,7 +61,31 @@ fi
 
 # Start services
 if [ "$build_status" -eq 0 ]; then
-  docker compose up -d --build "${INFRA_SERVICES[@]}" "${APP_SERVICES[@]}"
+  docker compose up -d "${INFRA_SERVICES[@]}"
+
+  for _ in {1..30}; do
+    if docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}" >/dev/null 2>&1; then
+      break
+    fi
+    sleep 2
+  done
+  if ! docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}" >/dev/null 2>&1; then
+    echo "ERROR: Postgres is not ready after waiting."
+    exit 1
+  fi
+
+  for _ in {1..30}; do
+    if docker compose exec -T redis redis-cli ping >/dev/null 2>&1; then
+      break
+    fi
+    sleep 2
+  done
+  if ! docker compose exec -T redis redis-cli ping >/dev/null 2>&1; then
+    echo "ERROR: Redis is not ready after waiting."
+    exit 1
+  fi
+
+  docker compose up -d --build "${APP_SERVICES[@]}"
 else
   docker compose up -d "${INFRA_SERVICES[@]}"
 fi
