@@ -65,11 +65,18 @@ wait_for_service_running() {
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
-if [ -f .env ]; then
-  set -a
-  source .env
-  set +a
+
+POSTGRES_CHECK_USER="${POSTGRES_USER:-}"
+if [ -z "$POSTGRES_CHECK_USER" ] && [ -f .env ]; then
+  POSTGRES_CHECK_USER="$(grep -E '^POSTGRES_USER=' .env | head -n1 | cut -d= -f2- | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
 fi
+POSTGRES_CHECK_USER="${POSTGRES_CHECK_USER:-postgres}"
+
+POSTGRES_CHECK_DB="${POSTGRES_DB:-}"
+if [ -z "$POSTGRES_CHECK_DB" ] && [ -f .env ]; then
+  POSTGRES_CHECK_DB="$(grep -E '^POSTGRES_DB=' .env | head -n1 | cut -d= -f2- | sed -E "s/^['\"]?(.*?)['\"]?$/\1/")"
+fi
+POSTGRES_CHECK_DB="${POSTGRES_CHECK_DB:-diabuoai}"
 
 # Update Corepack and PNPM
 corepack enable
@@ -114,10 +121,10 @@ wait_for_service_running redis
 
 wait_for_service \
   "Postgres is not ready after waiting." \
-  docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-postgres}"
+  docker compose exec -T postgres sh -lc "pg_isready -U '${POSTGRES_CHECK_USER}' -d '${POSTGRES_CHECK_DB}' | grep -Fq 'accepting connections'"
 wait_for_service \
   "Redis is not ready after waiting." \
-  docker compose exec -T redis redis-cli ping
+  docker compose exec -T redis sh -lc "redis-cli ping | grep -Fxq PONG"
 
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
