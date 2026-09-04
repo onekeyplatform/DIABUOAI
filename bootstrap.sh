@@ -21,11 +21,11 @@ find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
 pnpm install
 
 # Build all packages (best-effort, warn on failure)
-set +e
-pnpm turbo run build
-build_status=$?
-set -e
-if [ "$build_status" -ne 0 ]; then
+build_status=0
+if pnpm turbo run build; then
+  build_status=0
+else
+  build_status=$?
   echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
 fi
 
@@ -38,7 +38,7 @@ fi
 docker compose up -d postgres redis prometheus grafana mailhog
 
 # Start application
-docker compose up -d --build
+docker compose up -d --build web api workers agent
 
 echo
 echo "=== Container Status ==="
