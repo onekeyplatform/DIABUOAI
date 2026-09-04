@@ -92,13 +92,13 @@ fi
 
 POSTGRES_CHECK_USER="${POSTGRES_USER:-}"
 if [ -z "$POSTGRES_CHECK_USER" ] && [ -f .env ]; then
-  POSTGRES_CHECK_USER="$(grep -E '^(export[[:space:]]+)?POSTGRES_USER=' .env | head -n1 | sed -E 's/^(export[[:space:]]+)?POSTGRES_USER=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
+  POSTGRES_CHECK_USER="$(grep -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_USER[[:space:]]*=' .env | head -n1 | sed -E 's/^[[:space:]]*(export[[:space:]]+)?POSTGRES_USER[[:space:]]*=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
 fi
 POSTGRES_CHECK_USER="${POSTGRES_CHECK_USER:-postgres}"
 
 POSTGRES_CHECK_DB="${POSTGRES_DB:-}"
 if [ -z "$POSTGRES_CHECK_DB" ] && [ -f .env ]; then
-  POSTGRES_CHECK_DB="$(grep -E '^(export[[:space:]]+)?POSTGRES_DB=' .env | head -n1 | sed -E 's/^(export[[:space:]]+)?POSTGRES_DB=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
+  POSTGRES_CHECK_DB="$(grep -E '^[[:space:]]*(export[[:space:]]+)?POSTGRES_DB[[:space:]]*=' .env | head -n1 | sed -E 's/^[[:space:]]*(export[[:space:]]+)?POSTGRES_DB[[:space:]]*=//' | sed -E "s/^['\"]?(.*?)['\"]?$/\1/" || true)"
 fi
 POSTGRES_CHECK_DB="${POSTGRES_CHECK_DB:-diabuoai}"
 
@@ -142,8 +142,8 @@ fi
 pnpm install --frozen-lockfile
 
 # Build all packages (best-effort, warn on failure)
-if ! node -e "const pkg=require('./package.json'); process.exit(pkg?.scripts?.build === 'turbo run build' ? 0 : 1)"; then
-  echo "ERROR: package.json scripts.build must be 'turbo run build' for bootstrap."
+if ! node -e "const pkg=require('./package.json'); const build=pkg?.scripts?.build; process.exit(typeof build === 'string' && build.trim().length > 0 ? 0 : 1)"; then
+  echo "ERROR: package.json scripts.build must be defined for bootstrap."
   exit 1
 fi
 build_status=0
