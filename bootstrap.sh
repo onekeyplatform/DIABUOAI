@@ -21,9 +21,11 @@ find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
 pnpm install
 
 # Build all packages (best-effort, warn on failure)
-build_status=0
-if ! pnpm turbo run build; then
-  build_status=$?
+set +e
+pnpm turbo run build
+build_status=$?
+set -e
+if [ "$build_status" -ne 0 ]; then
   echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
 fi
 
