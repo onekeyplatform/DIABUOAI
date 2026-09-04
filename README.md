@@ -71,6 +71,13 @@ docs/
 ### Setup
 
 ```bash
+# One-command bootstrap
+bash ./bootstrap.sh
+```
+
+Or run the manual steps:
+
+```bash
 # 1. Install dependencies
 pnpm install
 
