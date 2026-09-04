@@ -44,6 +44,21 @@ wait_for_service() {
   return 0
 }
 
+wait_for_service_running() {
+  local service="$1"
+
+  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
+    if docker compose ps --status running --services | grep -Fxq "$service"; then
+      return 0
+    fi
+    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
+  done
+
+  echo "ERROR: ${service} container is not running after waiting."
+  docker compose ps "$service"
+  exit 1
+}
+
 # Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
@@ -91,6 +106,9 @@ fi
 
 # Start services
 docker compose up -d "${INFRA_SERVICES[@]}"
+
+wait_for_service_running postgres
+wait_for_service_running redis
 
 wait_for_service \
   "Postgres is not ready after waiting." \
