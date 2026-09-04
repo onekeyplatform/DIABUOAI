@@ -19,19 +19,24 @@ if [ "${1:-}" = "--clean" ]; then
   DO_CLEANUP=1
 fi
 
-wait_for_service() {
-  local name="$1"
-  local check_cmd="$2"
-  local error_message="$3"
+# Service readiness polling defaults (30 retries * 2s = 60s max wait per service).
+SERVICE_READY_MAX_RETRIES=30
+SERVICE_READY_RETRY_DELAY_SEC=2
 
-  for _ in {1..30}; do
+wait_for_service() {
+  local check_cmd="$1"
+  local error_message="$2"
+  local is_ready=1
+
+  for ((i = 1; i <= SERVICE_READY_MAX_RETRIES; i++)); do
     if eval "$check_cmd" >/dev/null 2>&1; then
-      return 0
+      is_ready=0
+      break
     fi
-    sleep 2
+    sleep "$SERVICE_READY_RETRY_DELAY_SEC"
   done
 
-  if ! eval "$check_cmd" >/dev/null 2>&1; then
+  if [ "$is_ready" -ne 0 ]; then
     echo "ERROR: ${error_message}"
     exit 1
   fi
@@ -82,10 +87,10 @@ fi
 # Start services
 docker compose up -d "${INFRA_SERVICES[@]}"
 
-wait_for_service "postgres" \
+wait_for_service \
   "docker compose exec -T postgres pg_isready -U '${POSTGRES_USER:-postgres}'" \
   "Postgres is not ready after waiting."
-wait_for_service "redis" \
+wait_for_service \
   "docker compose exec -T redis redis-cli ping" \
   "Redis is not ready after waiting."
 
