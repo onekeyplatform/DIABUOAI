@@ -6,23 +6,35 @@ echo "=== DIABUOAI Bootstrap ==="
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+PNPM_VERSION="$(node -p "require('./package.json').packageManager.split('@')[1]")"
+INFRA_SERVICES=(postgres redis prometheus grafana mailhog)
+APP_SERVICES=(web api workers agent)
+DO_CLEANUP="${BOOTSTRAP_CLEAN:-0}"
+if [ "${1:-}" = "--clean" ]; then
+  DO_CLEANUP=1
+fi
+
 # Update Corepack and PNPM
 corepack enable
-corepack prepare pnpm@9.15.0 --activate
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
 
-# Cleanup
-rm -rf node_modules
-find apps packages -name node_modules -type d -prune -exec rm -rf {} +
-find apps packages -name dist -type d -prune -exec rm -rf {} +
-find apps packages -name .next -type d -prune -exec rm -rf {} +
-find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
+# Optional cleanup
+if [ "$DO_CLEANUP" = "1" ]; then
+  rm -rf node_modules
+  find apps packages -name node_modules -type d -prune -exec rm -rf {} +
+  find apps packages -name dist -type d -prune -exec rm -rf {} +
+  find apps packages -name .next -type d -prune -exec rm -rf {} +
+  find . -maxdepth 2 -name .turbo -type d -prune -exec rm -rf {} +
+else
+  echo "Skipping cleanup (set BOOTSTRAP_CLEAN=1 or use --clean to enable)."
+fi
 
 # Install workspace dependencies
 pnpm install
 
 # Build all packages (best-effort, warn on failure)
 build_status=0
-if pnpm turbo run build; then
+if pnpm exec turbo run build; then
   build_status=0
 else
   build_status=$?
@@ -35,10 +47,10 @@ if [ ! -f .env ] && [ -f .env.example ]; then
 fi
 
 # Start infrastructure
-docker compose up -d postgres redis prometheus grafana mailhog
+docker compose up -d "${INFRA_SERVICES[@]}"
 
 # Start application
-docker compose up -d --build web api workers agent
+docker compose up -d --build "${APP_SERVICES[@]}"
 
 echo
 echo "=== Container Status ==="

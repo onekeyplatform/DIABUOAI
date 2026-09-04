@@ -73,6 +73,8 @@ docs/
 ```bash
 # One-command bootstrap
 bash ./bootstrap.sh
+# Optional full cleanup before install/build
+bash ./bootstrap.sh --clean
 ```
 
 Or run the manual steps:
