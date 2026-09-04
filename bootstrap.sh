@@ -56,6 +56,20 @@ wait_for_tcp_port() {
   exit 1
 }
 
+get_published_port() {
+  local service="$1"
+  local container_port="$2"
+  local mapping
+
+  mapping="$(docker compose port "$service" "$container_port" 2>/dev/null | head -n1 || true)"
+  if [ -z "$mapping" ]; then
+    echo "ERROR: Could not resolve published port for ${service}:${container_port}."
+    exit 1
+  fi
+
+  echo "${mapping##*:}"
+}
+
 # Copy .env if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
@@ -118,8 +132,11 @@ for service in "${INFRA_SERVICES[@]}"; do
   wait_for_service_running "$service"
 done
 
-wait_for_tcp_port "127.0.0.1" "5432" "Postgres TCP port is not reachable after waiting."
-wait_for_tcp_port "127.0.0.1" "6379" "Redis TCP port is not reachable after waiting."
+POSTGRES_HOST_PORT="$(get_published_port postgres 5432)"
+REDIS_HOST_PORT="$(get_published_port redis 6379)"
+
+wait_for_tcp_port "127.0.0.1" "$POSTGRES_HOST_PORT" "Postgres TCP port is not reachable after waiting."
+wait_for_tcp_port "127.0.0.1" "$REDIS_HOST_PORT" "Redis TCP port is not reachable after waiting."
 
 if [ "$build_status" -eq 0 ]; then
   docker compose up -d --build "${APP_SERVICES[@]}"
