@@ -6,7 +6,7 @@ echo "=== DIABUOAI Bootstrap ==="
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-PNPM_VERSION="$(node -p "require('./package.json').packageManager.split('@')[1]")"
+PNPM_VERSION="$(node -p "require('./package.json').packageManager.replace(/^pnpm@/, '')")"
 INFRA_SERVICES=(postgres redis prometheus grafana mailhog)
 APP_SERVICES=(web api workers agent)
 DO_CLEANUP="${BOOTSTRAP_CLEAN:-0}"
@@ -34,10 +34,8 @@ pnpm install
 
 # Build all packages (best-effort, warn on failure)
 build_status=0
-if pnpm exec turbo run build; then
-  build_status=0
-else
-  build_status=$?
+pnpm exec turbo run build || build_status=$?
+if [ "$build_status" -ne 0 ]; then
   echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
 fi
 
