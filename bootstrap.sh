@@ -140,8 +140,9 @@ fi
 # Start services
 docker compose up -d "${INFRA_SERVICES[@]}"
 
-wait_for_service_running postgres
-wait_for_service_running redis
+for service in "${INFRA_SERVICES[@]}"; do
+  wait_for_service_running "$service"
+done
 
 wait_for_service \
   "Postgres is not ready after waiting." \
