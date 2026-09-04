@@ -19,6 +19,11 @@ if [ "${1:-}" = "--clean" ]; then
   DO_CLEANUP=1
 fi
 
+# Copy .env if missing
+if [ ! -f .env ] && [ -f .env.example ]; then
+  cp .env.example .env
+fi
+
 # Update Corepack and PNPM
 corepack enable
 corepack prepare "pnpm@${PNPM_VERSION}" --activate
@@ -52,11 +57,6 @@ build_status=0
 pnpm build || build_status=$?
 if [ "$build_status" -ne 0 ]; then
   echo "WARNING: Workspace build failed (exit code: ${build_status}). Continuing bootstrap."
-fi
-
-# Copy .env if missing
-if [ ! -f .env ] && [ -f .env.example ]; then
-  cp .env.example .env
 fi
 
 # Start services
