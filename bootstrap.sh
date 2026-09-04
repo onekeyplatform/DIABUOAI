@@ -109,6 +109,12 @@ if command -v corepack >/dev/null 2>&1; then
 elif ! command -v pnpm >/dev/null 2>&1; then
   echo "ERROR: corepack is not available and pnpm is not installed."
   exit 1
+else
+  INSTALLED_PNPM_VERSION="$(pnpm --version)"
+  if [ "$INSTALLED_PNPM_VERSION" != "$PNPM_VERSION" ]; then
+    echo "ERROR: pnpm version mismatch. Required: ${PNPM_VERSION}, installed: ${INSTALLED_PNPM_VERSION}."
+    exit 1
+  fi
 fi
 
 # Optional cleanup
